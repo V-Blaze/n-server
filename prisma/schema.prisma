@@ -1,0 +1,62 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Admin {
+  id        Int            @id @default(autoincrement())
+  username  String         @unique
+  password  String
+  active    Boolean        @default(true)
+  lastLogin DateTime       @default(now())
+  wallet    AdminAddress[]
+}
+
+model AdminAddress {
+  id      Int     @id @default(autoincrement())
+  adminId Int
+  type    String
+  address String  @unique
+  active  Boolean @default(true)
+  admin   Admin   @relation(fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Staker {
+  id   Int    @id @default(autoincrement())
+  uuid String @unique @default(uuid())
+}
+
+model User {
+  id           Int    @id @default(autoincrement())
+  uuid         String @unique @default(uuid())
+  walletId     String @unique
+  referralCode String @unique
+}
+
+model Referral {
+  id       Int        @id @default(autoincrement())
+  address  String     @unique
+  code     String     @unique
+  uplinkId Int?
+  uplink   Referral?  @relation("UplinkChild", fields: [uplinkId], references: [id])
+  children Referral[] @relation("UplinkChild")
+}
+
+model Referralw {
+  id       Int        @id @default(autoincrement())
+  address  String     @unique
+  code     String     @unique
+  uplinkId Int?
+  uplink   Referralw?  @relation("UplinkChild", fields: [uplinkId], references: [id])
+  children Referralw[] @relation("UplinkChild")
+}
+
+model ReferralPayout {
+  id      Int    @id @default(autoincrement())
+  address String
+  amount  String
+}
